@@ -14,13 +14,18 @@ export default async function Home() {
     .eq('is_featured', true)
     .limit(4);
 
-  // Fetch hot products (latest 10 with stock > 0)
-  const { data: hotProducts } = await supabase
+  // Fetch best-sellers (sales_count > 0, ordered by most sold, limit 8)
+  const { data: bestSellers } = await supabase
     .from('products')
     .select('*')
-    .gt('stock', 0)
-    .order('created_at', { ascending: false })
-    .limit(10);
+    .gt('sales_count', 0)
+    .order('sales_count', { ascending: false })
+    .limit(8);
+
+  // Fallback: if no sales yet, show featured products
+  const hotProducts = (bestSellers && bestSellers.length > 0)
+    ? bestSellers
+    : (featuredProducts || []);
 
   return (
     <div className="flex flex-col min-h-screen">

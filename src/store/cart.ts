@@ -11,6 +11,7 @@ export interface Product {
   category?: string;
   description?: string;
   is_featured?: boolean;
+  sales_count?: number;
 }
 
 export interface CartItem extends Product {

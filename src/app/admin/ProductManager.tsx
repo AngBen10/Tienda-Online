@@ -11,6 +11,7 @@ type FormData = {
   description: string;
   price: string;
   stock: string;
+  sales_count: string;
   images: string[];
   category: string;
   is_featured: boolean;
@@ -21,6 +22,7 @@ const emptyForm: FormData = {
   description: '',
   price: '',
   stock: '',
+  sales_count: '0',
   images: [''],
   category: '',
   is_featured: false,
@@ -110,6 +112,19 @@ function ProductForm({
             className="w-full p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
             value={form.stock}
             onChange={(e) => set('stock', e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
+            Ventas
+          </label>
+          <input
+            type="number"
+            min="0"
+            placeholder="0"
+            className="w-full p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            value={form.sales_count}
+            onChange={(e) => set('sales_count', e.target.value)}
           />
         </div>
       </div>
@@ -222,6 +237,7 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
     description: p.description || '',
     price: String(p.price),
     stock: String(p.stock ?? ''),
+    sales_count: String(p.sales_count ?? 0),
     images: (p.images && p.images.length > 0) ? p.images : [p.image_url || ''],
     category: p.category || '',
     is_featured: p.is_featured || false,
@@ -234,6 +250,7 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
       description: form.description,
       price: parseFloat(form.price),
       stock: parseInt(form.stock),
+      sales_count: parseInt(form.sales_count) || 0,
       image_url: validImages[0] || '',
       images: validImages,
       category: form.category,
@@ -331,6 +348,7 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
               <th className="p-4 font-medium hidden sm:table-cell">Categoría</th>
               <th className="p-4 font-medium">Precio</th>
               <th className="p-4 font-medium hidden sm:table-cell">Stock</th>
+              <th className="p-4 font-medium hidden md:table-cell">Ventas</th>
               <th className="p-4 font-medium text-right">Acciones</th>
             </tr>
           </thead>
@@ -362,11 +380,14 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
                 <td className="p-4 text-neutral-500 hidden sm:table-cell">
                   {product.category || '—'}
                 </td>
-                <td className="p-4 font-medium">${Number(product.price).toLocaleString()}</td>
+                <td className="p-4 font-medium">Gs. {Number(product.price).toLocaleString('es-PY')}</td>
                 <td className="p-4 hidden sm:table-cell">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${Number(product.stock) > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
                     {product.stock ?? 0} uds.
                   </span>
+                </td>
+                <td className="p-4 hidden md:table-cell">
+                  <span className="text-neutral-500 text-xs">{product.sales_count ?? 0}</span>
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-1">
@@ -390,7 +411,7 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-10 text-center text-neutral-500">
+                <td colSpan={6} className="p-10 text-center text-neutral-500">
                   No hay productos registrados. ¡Crea el primero!
                 </td>
               </tr>
