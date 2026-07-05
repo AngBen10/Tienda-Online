@@ -7,9 +7,14 @@ CREATE TABLE products (
   price NUMERIC NOT NULL,
   stock INTEGER NOT NULL DEFAULT 0,
   image_url TEXT,
+  images TEXT[] DEFAULT '{}',
   category TEXT,
   is_featured BOOLEAN DEFAULT false
 );
+
+-- If you already have the table created, run this to add the new column:
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+
 
 -- Setup Row Level Security (RLS)
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
