@@ -5,6 +5,7 @@ import { Product } from '@/store/cart';
 import { createClient } from '@/utils/supabase/client';
 import { Trash2, Plus, Pencil, X, ImagePlus, GripVertical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { formatGs } from '@/utils/format';
 
 type FormData = {
   name: string;
@@ -87,16 +88,17 @@ function ProductForm({
             className="w-full p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
             value={form.category}
             onChange={(e) => set('category', e.target.value)}
+            placeholder="Ej: Cocina, Tecnología, Limpieza"
           />
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
-            Precio *
+            Precio (Gs.) *
           </label>
           <input
             required
             type="number"
-            step="0.01"
+            step="1"
             className="w-full p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
             value={form.price}
             onChange={(e) => set('price', e.target.value)}
@@ -116,16 +118,18 @@ function ProductForm({
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-1">
-            Ventas
+            Ventas (unidades vendidas)
           </label>
           <input
             type="number"
             min="0"
-            placeholder="0"
             className="w-full p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
             value={form.sales_count}
             onChange={(e) => set('sales_count', e.target.value)}
           />
+          <p className="text-[11px] text-neutral-400 mt-1">
+            Los productos con más ventas aparecen en “En Tendencia”.
+          </p>
         </div>
       </div>
 
@@ -141,7 +145,7 @@ function ProductForm({
         />
       </div>
 
-      {/* Images */}
+      {/* Imágenes */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-500">
@@ -168,7 +172,6 @@ function ProductForm({
                 value={img}
                 onChange={(e) => setImage(i, e.target.value)}
               />
-              {/* Preview */}
               {img && (
                 <img
                   src={img}
@@ -301,7 +304,7 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
 
   return (
     <div>
-      {/* Top bar */}
+      {/* Barra superior */}
       <div className="flex justify-end mb-6">
         {mode === 'idle' && (
           <button
@@ -314,7 +317,6 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
         )}
       </div>
 
-      {/* Add form */}
       {mode === 'add' && (
         <ProductForm
           initial={emptyForm}
@@ -324,7 +326,6 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
         />
       )}
 
-      {/* Edit form */}
       {typeof mode === 'object' && (
         <div className="mb-4">
           <p className="text-sm text-neutral-500 mb-3">
@@ -339,7 +340,7 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
         </div>
       )}
 
-      {/* Table */}
+      {/* Tabla */}
       <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
@@ -380,14 +381,14 @@ export function ProductManager({ initialProducts }: { initialProducts: Product[]
                 <td className="p-4 text-neutral-500 hidden sm:table-cell">
                   {product.category || '—'}
                 </td>
-                <td className="p-4 font-medium">Gs. {Number(product.price).toLocaleString('es-PY')}</td>
+                <td className="p-4 font-medium">{formatGs(Number(product.price))}</td>
                 <td className="p-4 hidden sm:table-cell">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${Number(product.stock) > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
                     {product.stock ?? 0} uds.
                   </span>
                 </td>
-                <td className="p-4 hidden md:table-cell">
-                  <span className="text-neutral-500 text-xs">{product.sales_count ?? 0}</span>
+                <td className="p-4 hidden md:table-cell text-neutral-600 dark:text-neutral-300 font-medium">
+                  {product.sales_count ?? 0}
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-1">

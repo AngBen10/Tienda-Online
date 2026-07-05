@@ -4,6 +4,7 @@ import { AddToCartButton } from './AddToCartButton';
 import { ProductGallery } from '@/components/ProductGallery';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { formatGs } from '@/utils/format';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const { data: product } = await supabase
     .from('products')
-    .select('name, description')
+    .select('name, description, image_url')
     .eq('id', id)
     .single();
 
@@ -20,6 +21,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `${product.name} | Anglic`,
     description: product.description,
+    openGraph: {
+      title: `${product.name} | Anglic`,
+      description: product.description || 'Disponible en Anglic - Hogar & Diseño',
+      images: product.image_url ? [product.image_url] : undefined,
+    },
   };
 }
 
@@ -37,7 +43,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  // Build image list: use images[] array if present, otherwise fall back to image_url
   const allImages: string[] = (product.images && product.images.length > 0)
     ? product.images
     : [product.image_url || 'https://images.unsplash.com/photo-1615529182904-14819c35db37?q=80&w=1000&auto=format&fit=crop'];
@@ -53,10 +58,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24">
-        {/* Galería de imágenes */}
         <ProductGallery images={allImages} name={product.name} />
 
-        {/* Info del producto */}
         <div className="flex flex-col justify-center">
           {product.category && (
             <span className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">
@@ -65,12 +68,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           )}
           <h1 className="text-4xl lg:text-5xl font-bold tracking-tight mb-4">{product.name}</h1>
           <p className="text-2xl font-medium text-neutral-900 dark:text-neutral-100 mb-8">
-            Gs. {product.price.toLocaleString('es-PY')}
+            {formatGs(product.price)}
           </p>
 
           <div className="prose prose-neutral dark:prose-invert mb-10">
             <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-400">
-              {product.description || 'Sin descripción detallada. Este producto ha sido seleccionado por su excelente diseño y materiales de alta calidad, perfecto para renovar cualquier espacio.'}
+              {product.description || 'Producto seleccionado por su calidad y buen precio. Ideal para tu hogar o uso diario.'}
             </p>
           </div>
 

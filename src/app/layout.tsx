@@ -14,24 +14,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://anglic.com.py"),
-  title: "Anglic - Hogar, Tecnología & Diseño",
-  description:
-    "Descubrí los mejores productos de hogar, tecnología y diseño en un solo lugar. Calidad premium al mejor precio en Paraguay.",
+  metadataBase: new URL("https://tienda-online-anglic.vercel.app"),
+  title: "Anglic - Hogar & Diseño",
+  description: "Productos para el hogar, tecnología y diseño. Envíos a todo Paraguay.",
   openGraph: {
-    title: "Anglic - Hogar, Tecnología & Diseño",
-    description:
-      "Descubrí los mejores productos de hogar, tecnología y diseño en un solo lugar. Calidad premium al mejor precio en Paraguay.",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Anglic - Hogar, Tecnología & Diseño",
-      },
-    ],
+    title: "Anglic - Hogar & Diseño",
+    description: "Productos para el hogar, tecnología y diseño. Envíos a todo Paraguay.",
+    url: "https://tienda-online-anglic.vercel.app",
+    siteName: "Anglic",
     locale: "es_PY",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg", // Subí una imagen 1200x630 a la carpeta /public
+        width: 1200,
+        height: 630,
+        alt: "Anglic - Hogar & Diseño",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anglic - Hogar & Diseño",
+    description: "Productos para el hogar, tecnología y diseño. Envíos a todo Paraguay.",
+    images: ["/og-image.jpg"],
   },
 };
 
