@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Instagram, Facebook, Mail } from 'lucide-react';
+import { MessageCircle, Share2, Mail } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -26,12 +26,12 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Conéctate</h3>
             <div className="flex space-x-4">
               <a href="#" className="text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
-                <span className="sr-only">Instagram</span>
-                <Instagram className="h-5 w-5" />
+                <span className="sr-only">Social</span>
+                <Share2 className="h-5 w-5" />
               </a>
               <a href="#" className="text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
-                <span className="sr-only">Facebook</span>
-                <Facebook className="h-5 w-5" />
+                <span className="sr-only">Chat</span>
+                <MessageCircle className="h-5 w-5" />
               </a>
               <a href="#" className="text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
                 <span className="sr-only">Email</span>
