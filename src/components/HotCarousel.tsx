@@ -82,7 +82,7 @@ export function HotCarousel({ products }: { products: Product[] }) {
             >
               {/* Dark-themed wrapper for card */}
               <div className="[&_h3]:text-neutral-200 [&_p]:text-neutral-300 [&_div.bg-neutral-100]:bg-neutral-800 [&_div.dark\:bg-neutral-800]:bg-neutral-800">
-                <ProductCard product={product} dark />
+                <ProductCard product={product} />
               </div>
             </div>
           ))}
