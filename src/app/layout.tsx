@@ -14,8 +14,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Anglic - Hogar & Diseño",
-  description: "Diseño y calidez para cada rincón de tu hogar.",
+  metadataBase: new URL("https://anglic.com.py"),
+  title: "Anglic - Hogar, Tecnología & Diseño",
+  description:
+    "Descubrí los mejores productos de hogar, tecnología y diseño en un solo lugar. Calidad premium al mejor precio en Paraguay.",
+  openGraph: {
+    title: "Anglic - Hogar, Tecnología & Diseño",
+    description:
+      "Descubrí los mejores productos de hogar, tecnología y diseño en un solo lugar. Calidad premium al mejor precio en Paraguay.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Anglic - Hogar, Tecnología & Diseño",
+      },
+    ],
+    locale: "es_PY",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

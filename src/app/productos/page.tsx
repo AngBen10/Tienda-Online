@@ -1,9 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
-import { ProductCard } from '@/components/ProductCard';
+import { CatalogClient } from './CatalogClient';
 
 export const metadata = {
-  title: 'Catálogo | Anglic - Hogar & Diseño',
-  description: 'Explora nuestra colección completa de productos de diseño y decoración.',
+  title: 'Catálogo | Anglic - Hogar, Tecnología & Diseño',
+  description: 'Explora nuestra colección completa de productos de hogar, tecnología y diseño.',
 };
 
 export default async function CatalogPage() {
@@ -20,21 +20,11 @@ export default async function CatalogPage() {
       <div className="mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">Catálogo Completo</h1>
         <p className="text-neutral-500 max-w-2xl">
-          Explora todas nuestras categorías y encuentra el detalle perfecto para renovar tus espacios.
+          Explorá todas nuestras categorías y encontrá el producto perfecto para tu hogar, tecnología y estilo de vida.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {products && products.length > 0 ? (
-          products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))
-        ) : (
-          <div className="col-span-full py-20 text-center text-neutral-500">
-            <p>No se encontraron productos por el momento.</p>
-          </div>
-        )}
-      </div>
+      <CatalogClient products={products || []} />
     </div>
   );
 }

@@ -3,40 +3,38 @@
 import { useCartStore } from '@/store/cart';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
-import Image from 'next/image';
 
 export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { items, removeItem, updateQuantity, clearCart } = useCartStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [formData, setFormData] = useState({ name: '', address: '' });
+  const [formData, setFormData] = useState({ name: '', address: '', phone: '' });
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Replace this with the actual target WhatsApp number (include country code, e.g., 54911...)
-    const WHA_NUMBER = "+595 971186482";
+    const WHA_NUMBER = "595971186482";
 
     let text = `*Nuevo Pedido - Anglic*\n\n`;
     text += `*Cliente:* ${formData.name}\n`;
+    text += `*Teléfono:* ${formData.phone}\n`;
     text += `*Dirección:* ${formData.address}\n\n`;
     text += `*Productos:*\n`;
 
     items.forEach(item => {
-      text += `- ${item.quantity}x ${item.name} ($${item.price.toLocaleString()})\n`;
+      text += `- ${item.quantity}x ${item.name} (Gs. ${item.price.toLocaleString('es-PY')})\n`;
     });
 
-    text += `\n*Total:* $${total.toLocaleString()}`;
+    text += `\n*Total:* Gs. ${total.toLocaleString('es-PY')}`;
 
     const encodedText = encodeURIComponent(text);
     const waUrl = `https://wa.me/${WHA_NUMBER}?text=${encodedText}`;
 
-    clearCart();
     onClose();
     setIsCheckingOut(false);
-
     window.open(waUrl, '_blank');
+    clearCart();
   };
 
   if (!isOpen) return null;
@@ -78,7 +76,6 @@ export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () =
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="w-20 h-20 relative rounded-md overflow-hidden bg-neutral-100 flex-shrink-0">
-                    {/* Using next/image requires domains config, we'll use a standard img tag for external urls for now or setup domains later */}
                     <img
                       src={item.image_url || 'https://images.unsplash.com/photo-1615529182904-14819c35db37?q=80&w=300&auto=format&fit=crop'}
                       alt={item.name}
@@ -88,7 +85,7 @@ export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="text-sm font-medium leading-tight">{item.name}</h3>
-                      <p className="text-sm text-neutral-500 mt-1">${item.price.toLocaleString()}</p>
+                      <p className="text-sm text-neutral-500 mt-1">Gs. {item.price.toLocaleString('es-PY')}</p>
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center border border-neutral-200 dark:border-neutral-800 rounded-md">
@@ -124,7 +121,7 @@ export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () =
           <div className="border-t border-neutral-200 dark:border-neutral-800 p-4 bg-neutral-50 dark:bg-neutral-900/50">
             <div className="flex justify-between mb-4">
               <span className="font-medium">Total</span>
-              <span className="font-medium">${total.toLocaleString()}</span>
+              <span className="font-medium">Gs. {total.toLocaleString('es-PY')}</span>
             </div>
 
             {isCheckingOut ? (
@@ -137,6 +134,16 @@ export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                     className="w-full px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-shadow"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <input
+                    required
+                    type="tel"
+                    placeholder="Tu teléfono (ej: 0981 123 456)"
+                    className="w-full px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-shadow"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
                 <div>

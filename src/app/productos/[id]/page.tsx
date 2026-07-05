@@ -65,7 +65,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           )}
           <h1 className="text-4xl lg:text-5xl font-bold tracking-tight mb-4">{product.name}</h1>
           <p className="text-2xl font-medium text-neutral-900 dark:text-neutral-100 mb-8">
-            ${product.price.toLocaleString()}
+            Gs. {product.price.toLocaleString('es-PY')}
           </p>
 
           <div className="prose prose-neutral dark:prose-invert mb-10">

@@ -39,7 +39,9 @@ export function ProductCard({ product }: { product: Product }) {
         <div>
           <h3 className="text-sm text-neutral-700 dark:text-neutral-300 font-medium truncate">{product.name}</h3>
         </div>
-        <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mt-1">${product.price.toLocaleString()}</p>
+        <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mt-1">
+          Gs. {product.price.toLocaleString('es-PY')}
+        </p>
       </div>
     </Link>
   );

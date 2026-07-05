@@ -33,10 +33,13 @@ export const useCartStore = create<CartState>()(
         set((state) => {
           const existingItem = state.items.find((item) => item.id === product.id);
           if (existingItem) {
+            // Respect stock limit
+            const maxQty = product.stock !== undefined ? product.stock : Infinity;
+            const newQty = Math.min(existingItem.quantity + 1, maxQty);
             return {
               items: state.items.map((item) =>
                 item.id === product.id
-                  ? { ...item, quantity: item.quantity + 1 }
+                  ? { ...item, quantity: newQty }
                   : item
               ),
             };
@@ -49,9 +52,11 @@ export const useCartStore = create<CartState>()(
         })),
       updateQuantity: (productId, quantity) =>
         set((state) => ({
-          items: state.items.map((item) =>
-            item.id === productId ? { ...item, quantity } : item
-          ),
+          items: state.items.map((item) => {
+            if (item.id !== productId) return item;
+            const maxQty = item.stock !== undefined ? item.stock : Infinity;
+            return { ...item, quantity: Math.min(quantity, maxQty) };
+          }),
         })),
       clearCart: () => set({ items: [] }),
     }),

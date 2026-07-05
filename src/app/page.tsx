@@ -38,7 +38,7 @@ export default async function Home() {
             Redefiniendo tu espacio
           </h1>
           <p className="text-lg md:text-xl text-neutral-200 mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
-            Descubre nuestra colección exclusiva de muebles y decoración minimalista, diseñada para brindar calma y elegancia a tu hogar.
+            Descubrí nuestra selección de productos de hogar, tecnología y diseño — todo lo que tu espacio necesita en un solo lugar.
           </p>
           <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
             <Link
