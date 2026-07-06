@@ -7,14 +7,16 @@ import { ArrowRight } from 'lucide-react';
 export default async function Home() {
   const supabase = await createClient();
 
-  // Productos destacados (para la sección "Destacados")
+  // DESTACADOS = los que vos marcaste con el check "Destacado".
+  // Subimos el límite a 8 para que quepan más si los marcás.
   const { data: featuredProducts } = await supabase
     .from('products')
     .select('*')
     .eq('is_featured', true)
-    .limit(4);
+    .order('created_at', { ascending: false })
+    .limit(8);
 
-  // "En Tendencia" = MÁS VENDIDOS: productos con ventas > 0, ordenados por sales_count
+  // EN TENDENCIA = más vendidos (sales_count > 0, de mayor a menor).
   const { data: bestSellers } = await supabase
     .from('products')
     .select('*')
@@ -22,21 +24,25 @@ export default async function Home() {
     .order('sales_count', { ascending: false })
     .limit(8);
 
-  // Fallback: si todavía no hay ventas registradas, mostramos los destacados
+  // Fallback del carrusel: si todavia no hay ventas registradas,
+  // mostramos los últimos productos cargados (con stock) para que la
+  // sección nunca quede vacía.
   let hotProducts = bestSellers || [];
   if (hotProducts.length === 0) {
     const { data: fallback } = await supabase
       .from('products')
       .select('*')
-      .eq('is_featured', true)
       .gt('stock', 0)
+      .order('created_at', { ascending: false })
       .limit(8);
     hotProducts = fallback || [];
   }
 
+  const hasFeatured = featuredProducts && featuredProducts.length > 0;
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-neutral-900">
         <div className="absolute inset-0 z-0">
           <img
@@ -64,43 +70,53 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* En Tendencia (más vendidos) */}
-      <HotCarousel products={hotProducts} />
+      {/* En Tendencia (más vendidos) - solo si hay algo que mostrar */}
+      {hotProducts.length > 0 && <HotCarousel products={hotProducts} />}
 
-      {/* Destacados */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Destacados</h2>
-            <p className="text-neutral-500 max-w-xl">Una selección especial de nuestros productos favoritos para tu día a día.</p>
+      {/* Destacados - solo si marcaste al menos uno */}
+      {hasFeatured && (
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Destacados</h2>
+              <p className="text-neutral-500 max-w-xl">Una selección especial de nuestros productos favoritos para tu día a día.</p>
+            </div>
+            <Link href="/productos" className="hidden md:flex items-center gap-1 text-sm font-medium hover:text-neutral-500 transition-colors">
+              Ver todo <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          <Link href="/productos" className="hidden md:flex items-center gap-1 text-sm font-medium hover:text-neutral-500 transition-colors">
-            Ver todo <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featuredProducts && featuredProducts.length > 0 ? (
-            featuredProducts.map((product) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProducts!.map((product) => (
               <ProductCard key={product.id} product={product} />
-            ))
-          ) : (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="animate-pulse flex flex-col gap-4">
-                <div className="bg-neutral-200 dark:bg-neutral-800 aspect-square w-full rounded-lg" />
-                <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-2/3" />
-                <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-1/3" />
-              </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
 
-        <div className="mt-12 text-center md:hidden">
-          <Link href="/productos" className="inline-flex items-center gap-1 text-sm font-medium hover:text-neutral-500 transition-colors">
-            Ver todo el catálogo <ArrowRight className="w-4 h-4" />
+          <div className="mt-12 text-center md:hidden">
+            <Link href="/productos" className="inline-flex items-center gap-1 text-sm font-medium hover:text-neutral-500 transition-colors">
+              Ver todo el catálogo <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Si NO marcaste ningún destacado, mostramos una franja simple
+          que invita a ver el catálogo completo (en vez de cuadros grises). */}
+      {!hasFeatured && (
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full text-center">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Descubrí nuestro catálogo</h2>
+          <p className="text-neutral-500 max-w-xl mx-auto mb-8">
+            Explorá todos nuestros productos para el hogar, tecnología y más.
+          </p>
+          <Link
+            href="/productos"
+            className="inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-medium hover:opacity-90 transition-opacity"
+          >
+            Ver Catálogo Completo
+            <ArrowRight className="w-4 h-4" />
           </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Filosofía */}
       <section className="bg-neutral-50 dark:bg-neutral-900 py-24 px-4 sm:px-6 lg:px-8">
