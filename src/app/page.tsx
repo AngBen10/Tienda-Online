@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { ProductCard } from '@/components/ProductCard';
-import { HotCarousel } from '@/components/HotCarousel';
+import { HeroSlider } from '@/components/HeroSlider';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -15,28 +15,6 @@ export default async function Home() {
     .eq('is_featured', true)
     .order('created_at', { ascending: false })
     .limit(8);
-
-  // EN TENDENCIA = más vendidos (sales_count > 0, de mayor a menor).
-  const { data: bestSellers } = await supabase
-    .from('products')
-    .select('*')
-    .gt('sales_count', 0)
-    .order('sales_count', { ascending: false })
-    .limit(8);
-
-  // Fallback del carrusel: si todavia no hay ventas registradas,
-  // mostramos los últimos productos cargados (con stock) para que la
-  // sección nunca quede vacía.
-  let hotProducts = bestSellers || [];
-  if (hotProducts.length === 0) {
-    const { data: fallback } = await supabase
-      .from('products')
-      .select('*')
-      .gt('stock', 0)
-      .order('created_at', { ascending: false })
-      .limit(8);
-    hotProducts = fallback || [];
-  }
 
   const hasFeatured = featuredProducts && featuredProducts.length > 0;
 
@@ -56,36 +34,8 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-neutral-900">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2000&auto=format&fit=crop"
-            alt="Hogar y diseño"
-            className="w-full h-full object-cover opacity-60"
-          />
-        </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            Todo para tu hogar
-          </h1>
-          <p className="text-lg md:text-xl text-neutral-200 mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
-            Productos prácticos, tecnología y detalles de diseño para renovar tus espacios. Envíos a todo Paraguay.
-          </p>
-          <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
-            <Link
-              href="/productos"
-              className="inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-neutral-200 transition-colors"
-            >
-              Explorar Catálogo
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* En Tendencia (más vendidos) - solo si hay algo que mostrar */}
-      {hotProducts.length > 0 && <HotCarousel products={hotProducts} />}
+      {/* Hero tipo slider automatico */}
+      <HeroSlider />
 
       {/* Destacados - solo si marcaste al menos uno */}
       {hasFeatured && (
