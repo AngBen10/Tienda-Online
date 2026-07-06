@@ -40,6 +40,20 @@ export default async function Home() {
 
   const hasFeatured = featuredProducts && featuredProducts.length > 0;
 
+  // NUESTROS PRODUCTOS: una muestra de 6 para la home.
+  // Excluimos los que ya aparecen en Destacados para no repetir.
+  const featuredIds = (featuredProducts || []).map((p) => p.id);
+  let sampleQuery = supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(6);
+  if (featuredIds.length > 0) {
+    // Postgres: not in (...)
+    sampleQuery = sampleQuery.not('id', 'in', `(${featuredIds.join(',')})`);
+  }
+  const { data: sampleProducts } = await sampleQuery;
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero */}
@@ -115,6 +129,32 @@ export default async function Home() {
             Ver Catálogo Completo
             <ArrowRight className="w-4 h-4" />
           </Link>
+        </section>
+      )}
+
+      {/* Nuestros Productos: muestra de 6 + "Ver mas" */}
+      {sampleProducts && sampleProducts.length > 0 && (
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Nuestros Productos</h2>
+            <p className="text-neutral-500 max-w-xl">Algunos de los productos que tenemos para vos.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {sampleProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          <div className="mt-14 text-center">
+            <Link
+              href="/productos"
+              className="inline-flex items-center gap-2 border border-neutral-300 dark:border-neutral-700 px-8 py-4 rounded-full font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            >
+              Ver más productos
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </section>
       )}
 
