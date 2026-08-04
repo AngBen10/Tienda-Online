@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { CatalogGrid } from '@/components/CatalogGrid';
 
 export const metadata = {
-  title: 'Catálogo | Anglic - Hogar & Diseño',
+  title: 'Catálogo | Lechugas Premium',
   description: 'Explora nuestra colección completa de productos para el hogar y más.',
 };
 

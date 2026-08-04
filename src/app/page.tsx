@@ -1,134 +1,208 @@
-import { createClient } from '@/utils/supabase/server';
-import { ProductCard } from '@/components/ProductCard';
-import { HeroSlider } from '@/components/HeroSlider';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+"use client";
 
-export default async function Home() {
-  const supabase = await createClient();
+import React, { useState } from 'react';
+import { Leaf, ShoppingCart, MapPin, Phone, User, CheckCircle2 } from 'lucide-react';
 
-  // DESTACADOS = los que vos marcaste con el check "Destacado".
-  // Subimos el límite a 8 para que quepan más si los marcás.
-  const { data: featuredProducts } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_featured', true)
-    .order('created_at', { ascending: false })
-    .limit(8);
+export default function LettuceLanding() {
+  const [formData, setFormData] = useState({
+    name: '',
+    ruc: '',
+    phone: '',
+    location: '',
+    quantity: 10,
+  });
 
-  const hasFeatured = featuredProducts && featuredProducts.length > 0;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  // NUESTROS PRODUCTOS: una muestra de 6 para la home.
-  // Excluimos los que ya aparecen en Destacados para no repetir.
-  const featuredIds = (featuredProducts || []).map((p) => p.id);
-  let sampleQuery = supabase
-    .from('products')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(6);
-  if (featuredIds.length > 0) {
-    // Postgres: not in (...)
-    sampleQuery = sampleQuery.not('id', 'in', `(${featuredIds.join(',')})`);
-  }
-  const { data: sampleProducts } = await sampleQuery;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.quantity < 10) {
+      alert('La cantidad mínima es de 10 unidades.');
+      return;
+    }
+
+    const message = `¡Hola! Me gustaría hacer un pedido de lechugas hidropónicas.%0A%0A*Detalles del pedido:*%0A- Nombre: ${formData.name}%0A- RUC/CI: ${formData.ruc}%0A- Teléfono: ${formData.phone}%0A- Ubicación: ${formData.location}%0A- Cantidad: ${formData.quantity} unidades%0A%0A¡Muchas gracias!`;
+    const whatsappUrl = `https://wa.me/595982445472?text=${message}`;
+
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero tipo slider automatico */}
-      <HeroSlider />
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 font-sans selection:bg-green-500 selection:text-white">
+      {/* Navbar Simple */}
+      <nav className="absolute top-0 w-full p-6 flex justify-between items-center z-10">
+        <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-bold text-xl">
+          <Leaf className="w-6 h-6" />
+          <span>Lechugas Premium</span>
+        </div>
+      </nav>
 
-      {/* Destacados - solo si marcaste al menos uno */}
-      {hasFeatured && (
-        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Destacados</h2>
-              <p className="text-neutral-500 max-w-xl">Una selección especial de nuestros productos favoritos para tu día a día.</p>
-            </div>
-            <Link href="/productos" className="hidden md:flex items-center gap-1 text-sm font-medium hover:text-neutral-500 transition-colors">
-              Ver todo <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts!.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          <div className="mt-12 text-center md:hidden">
-            <Link href="/productos" className="inline-flex items-center gap-1 text-sm font-medium hover:text-neutral-500 transition-colors">
-              Ver todo el catálogo <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* Si NO marcaste ningún destacado, mostramos una franja simple
-          que invita a ver el catálogo completo (en vez de cuadros grises). */}
-      {!hasFeatured && (
-        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full text-center">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Descubrí nuestro catálogo</h2>
-          <p className="text-neutral-500 max-w-xl mx-auto mb-8">
-            Explorá todos nuestros productos para el hogar, tecnología y más.
-          </p>
-          <Link
-            href="/productos"
-            className="inline-flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-8 py-4 rounded-full font-medium hover:opacity-90 transition-opacity"
-          >
-            Ver Catálogo Completo
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </section>
-      )}
-
-      {/* Nuestros Productos: muestra de 6 + "Ver mas" */}
-      {sampleProducts && sampleProducts.length > 0 && (
-        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-          <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Nuestros Productos</h2>
-            <p className="text-neutral-500 max-w-xl">Algunos de los productos que tenemos para vos.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sampleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          <div className="mt-14 text-center">
-            <Link
-              href="/productos"
-              className="inline-flex items-center gap-2 border border-neutral-300 dark:border-neutral-700 px-8 py-4 rounded-full font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-            >
-              Ver más productos
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* Filosofía */}
-      <section className="bg-neutral-50 dark:bg-neutral-900 py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div>
+      <main className="flex flex-col lg:flex-row min-h-screen">
+        {/* Left Section - Image & Copy */}
+        <div className="lg:w-1/2 relative bg-green-900 overflow-hidden flex flex-col justify-center p-8 lg:p-16">
+          <div className="absolute inset-0 opacity-40 mix-blend-overlay">
             <img
-              src="https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?q=80&w=1000&auto=format&fit=crop"
-              alt="Detalle de producto"
-              className="rounded-lg object-cover w-full h-[500px]"
+              src="/lechugas.jpg"
+              alt="Lechugas frescas del invernadero"
+              className="object-cover w-full h-full"
             />
           </div>
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">Nuestra Filosofía</h2>
-            <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-6">
-              En Anglic seleccionamos productos útiles, con buena relación precio-calidad, pensados para hacer más fácil y lindo tu día a día.
+          <div className="absolute inset-0 bg-gradient-to-t from-green-950/90 to-transparent lg:bg-gradient-to-r lg:from-green-950/90 lg:to-green-900/50" />
+
+          <div className="relative z-10 text-white max-w-xl mx-auto lg:mx-0 mt-16 lg:mt-0">
+            <span className="inline-block py-1 px-3 rounded-full bg-green-500/20 border border-green-400/30 text-green-300 text-sm font-medium mb-6">
+              Venta Mayorista
+            </span>
+            <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+              Del Invernadero <br /> a tu Mesa.
+            </h1>
+            <p className="text-lg text-green-100 mb-8 leading-relaxed">
+              Lechugas hidropónicas frescas, crujientes y de la mejor calidad. Cosechadas en el día para mantener todo su sabor y nutrientes.
             </p>
-            <p className="text-lg text-neutral-600 dark:text-neutral-400">
-              Compra fácil, coordinamos por WhatsApp y te lo enviamos a la puerta de tu casa en cualquier punto del país.
-            </p>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center gap-3">
+                <CheckCircle2 className="text-green-400 w-5 h-5" />
+                <span>100% Frescas y Orgánicas</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <CheckCircle2 className="text-green-400 w-5 h-5" />
+                <span>Sin pesticidas nocivos</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <CheckCircle2 className="text-green-400 w-5 h-5" />
+                <span>Atención directa al WhatsApp</span>
+              </li>
+            </ul>
           </div>
         </div>
-      </section>
+
+        {/* Right Section - Form */}
+        <div className="lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-white dark:bg-neutral-900">
+          <div className="w-full max-w-md">
+            <div className="mb-10 text-center lg:text-left">
+              <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Realizá tu Pedido</h2>
+              <p className="text-neutral-500 dark:text-neutral-400">
+                Completá el formulario para comunicarte directamente con el proveedor. (Mínimo 10 unidades)
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 ml-1">
+                  Nombre y Apellido
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-neutral-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow"
+                    placeholder="Juan Pérez"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 ml-1">
+                  RUC / CI
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-neutral-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="ruc"
+                    required
+                    value={formData.ruc}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow"
+                    placeholder="1234567-8"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 ml-1">
+                  Número de Teléfono
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-neutral-400" />
+                  </div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow"
+                    placeholder="09xx xxx xxx"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 ml-1">
+                  Ubicación (Dirección de entrega)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MapPin className="h-5 w-5 text-neutral-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="location"
+                    required
+                    value={formData.location}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow"
+                    placeholder="Asunción, Barrio..."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 ml-1">
+                  Cantidad (Mín. 10 unidades)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <ShoppingCart className="h-5 w-5 text-neutral-400" />
+                  </div>
+                  <input
+                    type="number"
+                    name="quantity"
+                    min="10"
+                    required
+                    value={formData.quantity}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow text-lg font-semibold"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-green-600/30 mt-4"
+              >
+                Hacer pedido por WhatsApp
+              </button>
+            </form>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -16,14 +16,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .eq('id', id)
     .single();
 
-  if (!product) return { title: 'Producto no encontrado | Anglic' };
+  if (!product) return { title: 'Producto no encontrado | Lechugas Premium' };
 
   return {
-    title: `${product.name} | Anglic`,
-    description: product.description,
+    title: `${product.name} | Lechugas Premium`,
+    description: product.description || 'Disponible en Lechugas Premium',
     openGraph: {
-      title: `${product.name} | Anglic`,
-      description: product.description || 'Disponible en Anglic - Hogar & Diseño',
+      title: `${product.name} | Lechugas Premium`,
+      description: product.description || 'Disponible en Lechugas Premium',
       images: product.image_url ? [product.image_url] : undefined,
     },
   };
