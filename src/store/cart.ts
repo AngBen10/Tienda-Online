@@ -38,11 +38,10 @@ export const useCartStore = create<CartState>()(
       addItem: (product) =>
         set((state) => {
           const limit = maxFor(product);
-          if (limit <= 0) return state; // sin stock, no se agrega
+          if (limit < 10) return state; // sin stock suficiente (mínimo 10)
 
           const existingItem = state.items.find((item) => item.id === product.id);
           if (existingItem) {
-            // No superar el stock disponible
             const nextQty = Math.min(existingItem.quantity + 1, limit);
             return {
               items: state.items.map((item) =>
@@ -50,7 +49,7 @@ export const useCartStore = create<CartState>()(
               ),
             };
           }
-          return { items: [...state.items, { ...product, quantity: 1 }] };
+          return { items: [...state.items, { ...product, quantity: 10 }] };
         }),
       removeItem: (productId) =>
         set((state) => ({
@@ -61,8 +60,10 @@ export const useCartStore = create<CartState>()(
           items: state.items.map((item) => {
             if (item.id !== productId) return item;
             const limit = maxFor(item);
-            // Entre 1 y el stock disponible
-            const safeQty = Math.max(1, Math.min(quantity, limit));
+            if (quantity < 10) {
+              return { ...item, quantity: 10 };
+            }
+            const safeQty = Math.min(quantity, limit);
             return { ...item, quantity: safeQty };
           }),
         })),

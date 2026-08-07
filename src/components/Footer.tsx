@@ -7,11 +7,16 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <Link href="/" className="text-2xl font-bold tracking-tighter">
-              ANGLIC.
+            <Link href="/" className="flex items-center gap-3 group">
+              <img
+                src="/logo.jpg"
+                alt="Hidrotec"
+                className="w-10 h-10 rounded-full object-cover border border-neutral-200 dark:border-neutral-700 group-hover:scale-105 transition-transform"
+              />
+              <span className="text-2xl font-bold tracking-tighter">HIDROTEC</span>
             </Link>
             <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400 max-w-sm">
-              Diseño y calidez para cada rincón de tu hogar. Seleccionamos los mejores productos para transformar tus espacios con elegancia y simplicidad.
+              Cultivo hidropónico premium. Lechugas frescas, crujientes y de la mejor calidad, directo del invernadero a tu mesa.
             </p>
           </div>
           <div>
@@ -41,9 +46,14 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-neutral-200 dark:border-neutral-800">
-          <p className="text-sm text-center text-neutral-400">
-            &copy; {new Date().getFullYear()} Anglic - Hogar & Diseño. Todos los derechos reservados.
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-xs text-neutral-400 tracking-wide">
+              Powered by <span className="font-bold" style={{ color: '#00A19B' }}>ANGLEX</span>
+            </p>
+            <p className="text-[10px] text-neutral-500 tracking-widest uppercase">
+              Software Solutions v2026
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Leaf, MapPin, Phone, User, Minus, Plus, ShoppingCart, X } from 'lucide-react';
+import { MapPin, Phone, User, Minus, Plus, ShoppingCart, X, CheckCircle2 } from 'lucide-react';
 
 const PRODUCTS = [
   { id: 'albahaca', name: 'Albahaca', price: 3000, image: '/albahaca.jpg' },
@@ -60,20 +60,41 @@ export default function LettuceLanding() {
     location: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Success state for order confirmation animation
+  const [orderSent, setOrderSent] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
+  // Minimum quantity per product = 10
   const updateCart = (id: string, delta: number) => {
     setCart(prev => {
       const current = prev[id] || 0;
-      const next = Math.max(0, current + delta);
+      if (current === 0 && delta > 0) {
+        // Adding product for the first time starts at minimum 10
+        return { ...prev, [id]: 10 };
+      }
+      const next = current + delta;
+      if (next < 10) {
+        // Decreasing below 10 removes product from cart
+        const newCart = { ...prev };
+        delete newCart[id];
+        return newCart;
+      }
       return { ...prev, [id]: next };
     });
   };
+
+  const resetOrder = useCallback(() => {
+    setCart({});
+    setFormData({ name: '', ruc: '', phone: '', location: '' });
+    setOrderSent(false);
+    setIsCartOpen(false);
+  }, []);
 
   const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
   const totalPrice = Object.entries(cart).reduce((total, [id, qty]) => {
@@ -81,10 +102,14 @@ export default function LettuceLanding() {
     return total + (product ? product.price * qty : 0);
   }, 0);
 
+  // Check if any product has invalid quantity (< 10)
+  const invalidItems = Object.entries(cart).filter(([_, qty]) => qty > 0 && qty < 10);
+  const isCartValid = totalItems > 0 && invalidItems.length === 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (totalItems < 10) {
-      alert('La cantidad mínima del pedido es de 10 unidades en total.');
+    if (!isCartValid) {
+      alert('La cantidad mínima de compra es de 10 unidades por producto.');
       return;
     }
 
@@ -100,15 +125,28 @@ export default function LettuceLanding() {
     const whatsappUrl = `https://wa.me/595982445472?text=${message}`;
 
     window.open(whatsappUrl, '_blank');
+
+    // Show success animation then reset data
+    setOrderSent(true);
+    setTimeout(() => {
+      resetOrder();
+    }, 2500);
   };
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 font-sans selection:bg-green-500 selection:text-white pb-24">
-      {/* Navbar Simple */}
-      <nav className="absolute top-0 w-full p-6 flex justify-between items-center z-30 bg-gradient-to-b from-black/60 to-transparent">
-        <div className="flex items-center gap-2 text-white font-bold text-xl">
-          <Leaf className="w-6 h-6 text-green-400" />
-          <span>Lechugas Premium</span>
+      {/* Navbar with Hidrotec Logo */}
+      <nav className="absolute top-0 w-full p-4 md:p-6 flex justify-between items-center z-30 bg-gradient-to-b from-black/60 to-transparent">
+        <div className="flex items-center gap-3 text-white font-bold text-xl">
+          <img
+            src="/logo.jpg"
+            alt="Hidrotec"
+            className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white/30 shadow-lg"
+          />
+          <div className="flex flex-col leading-tight">
+            <span className="text-lg md:text-xl font-extrabold tracking-tight">HIDROTEC</span>
+            <span className="text-[10px] md:text-xs font-normal text-green-300 tracking-widest uppercase">Cultivo Hidropónico</span>
+          </div>
         </div>
       </nav>
 
@@ -127,7 +165,6 @@ export default function LettuceLanding() {
               }`}
           >
             <div className="absolute inset-0">
-              {/* Se asume que el cliente colocará las imágenes en /public (ej: /lechuga_romana.jpg) */}
               <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30" />
             </div>
@@ -165,7 +202,7 @@ export default function LettuceLanding() {
       <main className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-black text-neutral-900 dark:text-white tracking-tight mb-4">Nuestros Productos</h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400">Seleccioná los mejores productos de nuestro invernadero. <br className="hidden md:block" />Mínimo de compra: 10 unidades en total.</p>
+          <p className="text-lg text-neutral-500 dark:text-neutral-400">Seleccioná los mejores productos de nuestro invernadero. <br className="hidden md:block" />Mínimo de compra: 10 unidades por producto.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -174,17 +211,17 @@ export default function LettuceLanding() {
             return (
               <div key={product.id} className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden hover:shadow-xl transition-shadow group flex flex-col">
                 <div className="h-48 bg-neutral-100 dark:bg-neutral-800 relative overflow-hidden">
-                  {/* Se asume que el cliente colocará las imágenes en /public */}
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {qty > 0 && (
-                    <div className="absolute top-2 right-2 bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md">
+                    <div className="absolute top-2 right-2 bg-green-500 text-white min-w-8 h-8 px-2 rounded-full flex items-center justify-center font-bold text-sm shadow-md">
                       {qty}
                     </div>
                   )}
                 </div>
                 <div className="p-5 flex flex-col flex-grow">
                   <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">{product.name}</h3>
-                  <p className="text-green-600 dark:text-green-400 font-semibold text-lg mb-4">{product.price.toLocaleString('es-PY')} Gs</p>
+                  <p className="text-green-600 dark:text-green-400 font-semibold text-lg mb-1">{product.price.toLocaleString('es-PY')} Gs</p>
+                  <p className="text-xs text-neutral-400 mb-4">Mínimo 10 unids.</p>
 
                   <div className="mt-auto">
                     {qty === 0 ? (
@@ -192,13 +229,14 @@ export default function LettuceLanding() {
                         onClick={() => updateCart(product.id, 1)}
                         className="w-full bg-neutral-100 dark:bg-neutral-800 hover:bg-green-500 hover:text-white dark:hover:bg-green-600 text-neutral-700 dark:text-neutral-300 font-semibold py-3 rounded-xl transition-colors flex justify-center items-center gap-2"
                       >
-                        <Plus className="w-5 h-5" /> Agregar
+                        <Plus className="w-5 h-5" /> Agregar 10 unids.
                       </button>
                     ) : (
                       <div className="flex items-center justify-between bg-neutral-100 dark:bg-neutral-800 rounded-xl p-1">
                         <button
                           onClick={() => updateCart(product.id, -1)}
                           className="w-10 h-10 rounded-lg flex items-center justify-center bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 shadow-sm hover:text-red-500 transition-colors"
+                          title={qty === 10 ? "Quitar producto" : "Restar 1"}
                         >
                           <Minus className="w-5 h-5" />
                         </button>
@@ -218,6 +256,38 @@ export default function LettuceLanding() {
           })}
         </div>
       </main>
+
+      {/* ANGLEX Footer */}
+      <footer className="bg-neutral-900 dark:bg-black border-t border-neutral-800">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          {/* Top: Hidrotec branding */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-3">
+              <img src="/logo.jpg" alt="Hidrotec" className="w-10 h-10 rounded-full object-cover border border-white/20" />
+              <div>
+                <span className="text-white font-bold text-lg tracking-tight">HIDROTEC</span>
+                <p className="text-neutral-500 text-xs">Cultivo Hidropónico Premium</p>
+              </div>
+            </div>
+            <div className="flex gap-6 text-neutral-500 text-sm">
+              <span>📞 +595 982 445 472</span>
+              <span>📍 Paraguay</span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-neutral-800 pt-6">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-neutral-500 text-xs tracking-wide">
+                Powered by <span className="font-bold text-[#00A19B]">ANGLEX</span>
+              </p>
+              <p className="text-neutral-600 text-[10px] tracking-widest uppercase">
+                Software Solutions v2026
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* Sticky Bottom Cart Button */}
       {totalItems > 0 && (
@@ -253,6 +323,17 @@ export default function LettuceLanding() {
               </button>
             </div>
 
+            {/* Order Sent Success Overlay */}
+            {orderSent && (
+              <div className="absolute inset-0 z-50 bg-white/95 dark:bg-neutral-900/95 flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
+                <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center animate-in zoom-in duration-500">
+                  <CheckCircle2 className="w-12 h-12 text-green-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white">¡Pedido Enviado!</h3>
+                <p className="text-neutral-500 text-center max-w-xs">Tu pedido fue enviado por WhatsApp. Los datos se reiniciarán para un nuevo pedido.</p>
+              </div>
+            )}
+
             <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
               {/* Order Summary */}
               <div className="mb-8">
@@ -269,9 +350,9 @@ export default function LettuceLanding() {
                   <span className="font-bold text-neutral-900 dark:text-white">Total</span>
                   <span className="font-black text-xl text-green-600 dark:text-green-400">{totalPrice.toLocaleString('es-PY')} Gs</span>
                 </div>
-                {totalItems < 10 && (
+                {invalidItems.length > 0 && (
                   <p className="text-red-500 text-sm font-medium mt-2 bg-red-50 p-3 rounded-lg border border-red-100 dark:bg-red-950/30 dark:border-red-900/50">
-                    Faltan {10 - totalItems} unidades para el mínimo de 10.
+                    El mínimo de compra es 10 unidades por producto.
                   </p>
                 )}
               </div>
@@ -326,17 +407,17 @@ export default function LettuceLanding() {
                 </div>
 
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
                     <MapPin className="h-5 w-5 text-neutral-400" />
                   </div>
-                  <input
-                    type="text"
+                  <textarea
                     name="location"
                     required
+                    rows={3}
                     value={formData.location}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow"
-                    placeholder="Dirección de entrega"
+                    className="block w-full pl-10 pr-3 py-3 border border-neutral-300 dark:border-neutral-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-transparent text-neutral-900 dark:text-white transition-shadow resize-none"
+                    placeholder="Dirección o referencia de entrega (ej: Av. Mariscal López 1234 c/ San Martín, Asunción)"
                   />
                 </div>
               </form>
@@ -346,8 +427,8 @@ export default function LettuceLanding() {
               <button
                 type="submit"
                 form="checkout-form"
-                disabled={totalItems < 10}
-                className={`w-full flex items-center justify-center gap-2 text-white px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${totalItems < 10
+                disabled={!isCartValid}
+                className={`w-full flex items-center justify-center gap-2 text-white px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${!isCartValid
                     ? 'bg-neutral-400 cursor-not-allowed shadow-none'
                     : 'bg-green-600 hover:bg-green-700 transform hover:scale-[1.02] active:scale-95 shadow-green-600/30'
                   }`}
