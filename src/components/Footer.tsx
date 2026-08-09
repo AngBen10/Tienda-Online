@@ -23,7 +23,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Enlaces Rápidos</h3>
             <ul className="space-y-3 text-sm text-neutral-500 dark:text-neutral-400">
               <li><Link href="/" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Inicio</Link></li>
-              <li><Link href="/productos" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Catálogo Completo</Link></li>
+              {/* Se eliminó el enlace al Catálogo que ya no existe */}
               <li><Link href="/admin/login" className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">Acceso Administrador</Link></li>
             </ul>
           </div>
