@@ -29,9 +29,7 @@ export function Navbar({ onOpenCart }: { onOpenCart: () => void }) {
             <Link href="/" className="text-sm font-medium hover:text-neutral-500 transition-colors">
               Inicio
             </Link>
-            <Link href="/productos" className="text-sm font-medium hover:text-neutral-500 transition-colors">
-              Catálogo
-            </Link>
+            {/* Se eliminó el enlace de Catálogo */}
             <button
               onClick={onOpenCart}
               className="relative p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
@@ -80,13 +78,7 @@ export function Navbar({ onOpenCart }: { onOpenCart: () => void }) {
             >
               Inicio
             </Link>
-            <Link
-              href="/productos"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-            >
-              Catálogo
-            </Link>
+            {/* Se eliminó el enlace de Catálogo móvil */}
           </div>
         </div>
       )}

@@ -11,7 +11,6 @@ export default function LettuceLanding() {
   const [slides, setSlides] = useState<any[]>([]);
   const supabase = createClient();
 
-  // Traemos el estado global de Zustand para que sincronice en toda la app
   const { items, addItem, updateQuantity, removeItem, clearCart } = useCartStore();
 
   const count = slides.length;
@@ -26,7 +25,7 @@ export default function LettuceLanding() {
         const featured = data.filter(p => p.is_featured);
 
         const mapToSlide = (p: any) => ({
-          key: p.id, id: p.id, title: p.name, subtitle: p.description || 'Calidad premium directa del invernadero.', image: p.image_url
+          key: p.id, id: p.id, title: p.name, subtitle: p.description || 'Calidad premium directa del invernadero.', image: p.image_url, rawProduct: p
         });
 
         setSlides(featured.length > 0 ? featured.map(mapToSlide) : data.slice(0, 3).map(mapToSlide));
@@ -51,7 +50,6 @@ export default function LettuceLanding() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Funciones para actualizar el carrito global de Zustand desde la portada
   const getQty = (id: string) => items.find(i => i.id === id)?.quantity || 0;
 
   const handleUpdateCart = (product: any, delta: number) => {
@@ -78,7 +76,6 @@ export default function LettuceLanding() {
     setIsCartOpen(false);
   }, [clearCart]);
 
-  // Cálculos dinámicos leyendo de Zustand
   const totalItems = items.reduce((a, b) => a + b.quantity, 0);
   const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
   const invalidItems = items.filter(item => item.quantity > 0 && item.quantity < 10);
@@ -123,9 +120,19 @@ export default function LettuceLanding() {
               <h1 className={`text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 transition-all duration-700 delay-100 ${i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>{slide.title}</h1>
               <p className={`text-lg md:text-2xl text-green-100 max-w-2xl mb-8 transition-all duration-700 delay-200 ${i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>{slide.subtitle}</p>
 
-              <Link href={`/productos/${slide.id}`} className={`bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-bold transition-all duration-700 delay-300 ${i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                Ver Producto
-              </Link>
+              {/* El botón del banner ahora añade al carrito y hace scroll hacia abajo */}
+              <button
+                onClick={() => {
+                  const stock = slide.rawProduct.stock || 0;
+                  if (stock >= 10 && getQty(slide.rawProduct.id) === 0) {
+                    handleUpdateCart(slide.rawProduct, 1);
+                  }
+                  document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-bold transition-all duration-700 delay-300 ${i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+              >
+                Añadir al Carrito
+              </button>
             </div>
           </div>
         ))}
@@ -146,16 +153,23 @@ export default function LettuceLanding() {
 
             return (
               <div key={product.id} className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden hover:shadow-xl transition-shadow group flex flex-col">
-                <Link href={`/productos/${product.id}`}>
-                  <div className="h-48 bg-neutral-100 dark:bg-neutral-800 relative overflow-hidden cursor-pointer">
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    {qty > 0 && <div className="absolute top-2 right-2 bg-green-500 text-white min-w-8 h-8 px-2 rounded-full flex items-center justify-center font-bold text-sm">{qty}</div>}
-                  </div>
-                </Link>
+                {/* Se eliminó el Link. Ahora al tocar la imagen añade al carrito. */}
+                <div
+                  onClick={() => { if (!isAgotado && qty === 0) handleUpdateCart(product, 1); }}
+                  className="h-48 bg-neutral-100 dark:bg-neutral-800 relative overflow-hidden cursor-pointer"
+                >
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {qty > 0 && <div className="absolute top-2 right-2 bg-green-500 text-white min-w-8 h-8 px-2 rounded-full flex items-center justify-center font-bold text-sm">{qty}</div>}
+                </div>
+
                 <div className="p-5 flex flex-col flex-grow">
-                  <Link href={`/productos/${product.id}`}>
-                    <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-1 hover:text-green-500 transition-colors">{product.name}</h3>
-                  </Link>
+                  {/* Se eliminó el Link del título. Ahora al tocar añade al carrito. */}
+                  <h3
+                    onClick={() => { if (!isAgotado && qty === 0) handleUpdateCart(product, 1); }}
+                    className="text-xl font-bold text-neutral-900 dark:text-white mb-1 cursor-pointer hover:text-green-500 transition-colors"
+                  >
+                    {product.name}
+                  </h3>
                   <p className="text-green-600 dark:text-green-400 font-semibold text-lg mb-1">{Number(product.price).toLocaleString('es-PY')} Gs</p>
 
                   <p className="text-xs text-neutral-500 mb-4">
@@ -215,7 +229,7 @@ export default function LettuceLanding() {
         </div>
       </footer>
 
-      {/* Sticky Bottom Cart Button - AHORA SINCRONIZADO GLOBALMENTE */}
+      {/* Sticky Bottom Cart Button */}
       {totalItems > 0 && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 z-40 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
